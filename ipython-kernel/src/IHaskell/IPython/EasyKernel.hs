@@ -163,7 +163,7 @@ replyTo :: MonadIO m
         -> Message
         -> MessageHeader
         -> m Message
-replyTo config _ _ KernelInfoRequest{} replyHeader =
+replyTo config _ interface KernelInfoRequest{} replyHeader =
   return
     KernelInfoReply
       { header = replyHeader
@@ -172,6 +172,7 @@ replyTo config _ _ KernelInfoRequest{} replyHeader =
       , implementationVersion = kernelImplVersion config
       , banner = kernelBanner config
       , protocolVersion = kernelProtocolVersion config
+      , status = Ok 
       }
 
 replyTo config _ _ CommInfoRequest{} replyHeader =

@@ -255,7 +255,19 @@ replyTo :: ZeroMQInterface -> Message -> MessageHeader -> KernelState -> Interpr
 -- Reply to kernel info requests with a kernel info reply. No computation needs to be done, as a
 -- kernel info reply is a static object (all info is hard coded into the representation of that
 -- message type).
-replyTo _ KernelInfoRequest{} replyHeader state =
+replyTo interface KernelInfoRequest{} replyHeader state = do
+  -- Convenience function to send a message to the IOPub socket.
+  let send msg = liftIO $ writeChan (iopubChannel interface) msg
+  -- Notify the frontend that the kernel is busy computing. All the headers are copies of the reply
+  -- header with a different message type, because this preserves the session ID, parent header, and
+  -- other important information.
+  busyHeader <- liftIO $ dupHeader replyHeader StatusMessage
+  send $ PublishStatus busyHeader Busy
+
+  -- Notify the frontend that we're done computing.
+  idleHeader <- liftIO $ dupHeader replyHeader StatusMessage
+  send $ PublishStatus idleHeader Idle
+
   return
     (state, KernelInfoReply
               { header = replyHeader
@@ -267,8 +279,10 @@ replyTo _ KernelInfoRequest{} replyHeader state =
                 { languageName = "haskell"
                 , languageVersion = VERSION_ghc
                 , languageFileExtension = ".hs"
-                , languageCodeMirrorMode = "ihaskell"
+                , languageCodeMirrorMode = "Haskell"
+                , languagePygmentsLexer = "Haskell"
                 }
+              , status = Ok
               })
 
 replyTo _ CommInfoRequest{} replyHeader state =
