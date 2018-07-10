@@ -174,7 +174,7 @@ data WidgetDisplay = WidgetDisplay MessageHeader String [DisplayData]
 
 instance ToJSON WidgetDisplay where
   toJSON (WidgetDisplay replyHeader source ddata) =
-    let pbval = toJSON $ PublishDisplayData replyHeader source ddata
+    let pbval = toJSON $ PublishDisplayData replyHeader ddata
     in toJSON $ IPythonMessage replyHeader pbval DisplayDataMessage
 
 -- Override toJSON for ClearOutput
