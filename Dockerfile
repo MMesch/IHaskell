@@ -5,7 +5,8 @@ RUN apt-get update && apt-get install -y python3-pip libgmp-dev libmagic-dev lib
     rm -rf /var/lib/apt/lists/*
 
 # Install Jupyter notebook
-RUN pip3 install -U jupyter
+RUN pip3 install -U jupyter && \
+    pip3 install -U jupyterlab
 
 ENV LANG en_US.UTF-8
 ENV NB_USER jovyan
@@ -59,4 +60,4 @@ RUN stack build && stack install
 ENV PATH $(stack path --local-install-root)/bin:$(stack path --snapshot-install-root)/bin:$(stack path --compiler-bin):/home/${NB_USER}/.local/bin:${PATH}
 RUN ihaskell install --stack
 WORKDIR ${HOME}
-CMD ["jupyter", "notebook", "--ip", "0.0.0.0"]
+CMD ["jupyter", "lab", "--ip", "0.0.0.0"]
